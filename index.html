@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>启动页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #wallpaper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+            transition: background-image 1s ease-in-out;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            padding: 20px;
+            padding-top: 22vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .time-section {
+            text-align: center;
+            margin-bottom: 35px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        #time {
+            font-size: 64px;
+            font-weight: 300;
+            color: white;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+            letter-spacing: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #date {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.4);
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        .search-section {
+            width: 100%;
+            max-width: 560px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .search-engine-selector {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .engine-btn {
+            padding: 7px 18px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .engine-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .engine-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: white;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 26px;
+            padding: 12px 22px;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            height: 50px;
+        }
+
+        .search-box:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 
+                0 6px 28px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        #searchInput {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: transparent;
+            color: white;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.75);
+            text-align: center;
+        }
+
+        .clear-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            margin-left: 8px;
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+        }
+
+        .clear-btn.show {
+            display: flex;
+        }
+
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .clear-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.9;
+        }
+
+        .search-submit {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+        }
+
+        .search-submit:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.08);
+        }
+
+        .submit-icon {
+            width: 16px;
+            height: 16px;
+            opacity: 0.9;
+        }
+
+        .clear-hint {
+            text-align: center;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .clear-hint:hover {
+            color: white;
+        }
+
+        /* 右下角壁纸切换按钮 */
+        .wallpaper-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.18),
+                0 2px 4px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .wallpaper-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.12);
+            box-shadow: 
+                0 8px 28px rgba(0, 0, 0, 0.25),
+                0 4px 8px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .wallpaper-btn:active {
+            transform: scale(0.95);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .wallpaper-btn svg {
+            width: 22px;
+            height: 22px;
+            opacity: 0.9;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+        }
+
+        .wallpaper-loading {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            z-index: 10;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 底部工具栏 */
+        .bottom-bar {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 10;
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        .shortcut-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .shortcut-link:hover {
+            transform: translateY(-3px);
+        }
+
+        .shortcut-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .shortcut-link:hover .shortcut-icon {
+            box-shadow: 
+                0 8px 28px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .shortcut-icon.doubao {
+            background: rgba(74, 154, 255, 0.45);
+            border: 1px solid rgba(74, 154, 255, 0.5);
+        }
+
+        .shortcut-icon.bili {
+            background: rgba(251, 114, 153, 0.45);
+            border: 1px solid rgba(251, 114, 153, 0.5);
+        }
+
+        .shortcut-icon.douyin {
+            background: rgba(30, 32, 40, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .shortcut-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .news-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(255, 165, 60, 0.4);
+            border: 1px solid rgba(255, 165, 60, 0.5);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .news-btn:hover {
+            background: rgba(255, 165, 60, 0.55);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 28px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .news-btn:active {
+            transform: scale(0.95);
+        }
+
+        .news-btn svg {
+            width: 24px;
+            height: 24px;
+            opacity: 0.95;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+        }
+
+        /* 60s新闻弹窗 */
+        .news-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .news-modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .news-modal {
+            width: 90%;
+            max-width: 480px;
+            max-height: 80vh;
+            background: rgba(30, 35, 50, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .news-modal-overlay.show .news-modal {
+            transform: scale(1);
+        }
+
+        .news-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .news-modal-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .news-close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .news-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .news-close-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .news-modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .news-modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .news-modal-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .news-modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .news-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-index {
+            min-width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: rgba(255, 165, 60, 0.3);
+            color: rgba(255, 200, 120, 1);
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .news-weiyu {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            color: rgba(255, 220, 180, 0.9);
+            font-size: 13px;
+            line-height: 1.6;
+            border-left: 3px solid rgba(255, 165, 60, 0.5);
+        }
+
+        .news-loading {
+            text-align: center;
+            padding: 40px 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .news-loading .loader {
+            width: 28px;
+            height: 28px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top-color: rgba(255, 165, 60, 0.8);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        .news-error {
+            text-align: center;
+            padding: 40px 0;
+            color: rgba(255, 150, 150, 0.8);
+            font-size: 14px;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        .divider {
+            width: 1px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 18vh;
+            }
+
+            #time {
+                font-size: 44px;
+                letter-spacing: 3px;
+            }
+
+            #date {
+                font-size: 13px;
+            }
+
+            .search-section {
+                max-width: 88%;
+            }
+
+            .engine-btn {
+                padding: 6px 14px;
+                font-size: 12px;
+            }
+
+            .search-box {
+                padding: 10px 18px;
+                height: 46px;
+                border-radius: 24px;
+            }
+
+            #searchInput {
+                font-size: 14px;
+            }
+
+            .wallpaper-btn {
+                width: 42px;
+                height: 42px;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .bottom-bar {
+                bottom: 20px;
+                gap: 12px;
+            }
+
+            .shortcut-icon, .news-btn {
+                width: 42px;
+                height: 42px;
+                border-radius: 12px;
+            }
+
+            .shortcut-icon {
+                font-size: 17px;
+            }
+
+            .shortcut-label {
+                font-size: 10px;
+            }
+
+            .divider {
+                height: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding-top: 15vh;
+            }
+
+            #time {
+                font-size: 34px;
+                letter-spacing: 2px;
+            }
+
+            .search-engine-selector {
+                gap: 5px;
+            }
+
+            .engine-btn {
+                padding: 5px 11px;
+                font-size: 11px;
+            }
+
+            .search-box {
+                padding: 8px 14px;
+                height: 42px;
+                border-radius: 22px;
+            }
+
+            #searchInput {
+                font-size: 13px;
+            }
+
+            .bottom-bar {
+                gap: 10px;
+                bottom: 16px;
+            }
+
+            .shortcut-icon, .news-btn {
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+            }
+
+            .shortcut-icon {
+                font-size: 15px;
+            }
+
+            .shortcut-label {
+                font-size: 9px;
+            }
+
+            .divider {
+                height: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="wallpaper"></div>
+    <div class="overlay"></div>
+    
+    <div class="wallpaper-loading" id="loadingHint" style="display: none;">正在加载壁纸...</div>
+
+    <div class="container">
+        <div class="time-section">
+            <div id="time">00:00:00</div>
+            <div id="date"></div>
+        </div>
+
+        <div class="search-section">
+            <div class="search-engine-selector">
+                <button class="engine-btn" data-engine="baidu">百度</button>
+                <button class="engine-btn active" data-engine="bing">必应</button>
+                <button class="engine-btn" data-engine="google">Google</button>
+            </div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索" autocomplete="off">
+                <button class="clear-btn" id="clearBtn" title="清除内容">
+                    <svg class="clear-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </button>
+                <button class="search-submit" id="submitBtn" title="搜索">
+                    <svg class="submit-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="clear-hint" id="clearHint">清除搜索内容</div>
+        </div>
+    </div>
+
+    <!-- 右下角壁纸切换按钮 -->
+    <button class="wallpaper-btn" id="wallpaperBtn" title="切换壁纸">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+    </button>
+
+    <!-- 底部工具栏 -->
+    <div class="bottom-bar">
+        <a class="shortcut-link" href="https://www.doubao.com" target="_blank" title="豆包">
+            <div class="shortcut-icon doubao">豆</div>
+            <span class="shortcut-label">豆包</span>
+        </a>
+        <a class="shortcut-link" href="https://www.bilibili.com" target="_blank" title="哔哩哔哩">
+            <div class="shortcut-icon bili">B</div>
+            <span class="shortcut-label">哔哩哔哩</span>
+        </a>
+        <a class="shortcut-link" href="https://www.douyin.com" target="_blank" title="抖音">
+            <div class="shortcut-icon douyin">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                    <path d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z"/>
+                </svg>
+            </div>
+            <span class="shortcut-label">抖音</span>
+        </a>
+        <div class="divider"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+            <button class="news-btn" id="newsBtn" title="每天60秒看世界">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/>
+                    <path d="M18 14h-8"/>
+                    <path d="M15 18h-5"/>
+                    <path d="M10 6h8v4h-8z"/>
+                </svg>
+            </button>
+            <span class="shortcut-label">60s看世界</span>
+        </div>
+    </div>
+
+    <!-- 60s新闻弹窗 -->
+    <div class="news-modal-overlay" id="newsModal">
+        <div class="news-modal">
+            <div class="news-modal-header">
+                <div class="news-modal-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,165,60,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    每天60秒看世界
+                </div>
+                <button class="news-close-btn" id="newsCloseBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="news-modal-body" id="newsModalBody">
+                <div class="news-loading">
+                    <div class="loader"></div>
+                    正在获取新闻...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchEngines = {
+            baidu: 'https://www.baidu.com/s?wd=',
+            bing: 'https://www.bing.com/search?q=',
+            google: 'https://www.google.com/search?q='
+        };
+
+        let currentEngine = 'bing';
+        const WALLPAPER_API = 'https://wp.upx8.com/api.php?category=nature';
+        let isLoadingWallpaper = false;
+
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const weekday = weekdays[now.getDay()];
+            
+            document.getElementById('date').textContent = `${year}年${month}月${day}日 ${weekday}`;
+        }
+
+        async function loadWallpaper() {
+            if (isLoadingWallpaper) return;
+            isLoadingWallpaper = true;
+
+            const hint = document.getElementById('loadingHint');
+            const btn = document.getElementById('wallpaperBtn');
+            hint.style.display = 'block';
+            hint.textContent = '正在加载壁纸...';
+
+            const btnSvg = btn.querySelector('svg');
+            btnSvg.classList.add('spinning');
+
+            const apiUrl = `${WALLPAPER_API}&t=${new Date().getTime()}`;
+
+            // 该接口返回 302 跳转到真实图片地址，先跟随重定向拿到最终 URL
+            const applyWallpaper = (url) => {
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('wallpaper').style.backgroundImage = `url(${url})`;
+                    hint.style.display = 'none';
+                    btnSvg.classList.remove('spinning');
+                    isLoadingWallpaper = false;
+                };
+                img.onerror = function() {
+                    hint.textContent = '壁纸加载失败，点击重试';
+                    btnSvg.classList.remove('spinning');
+                    isLoadingWallpaper = false;
+                };
+                img.src = url;
+            };
+
+            try {
+                const response = await fetch(apiUrl, { method: 'GET', redirect: 'follow' });
+                let wallpaperUrl = response.url;
+                if (wallpaperUrl.startsWith('http://')) {
+                    wallpaperUrl = wallpaperUrl.replace('http://', 'https://');
+                }
+                applyWallpaper(wallpaperUrl);
+            } catch (error) {
+                console.error('解析壁纸地址失败，直接加载接口地址:', error);
+                // 兜底：直接把接口地址作为图片源，交给浏览器跟随跳转
+                applyWallpaper(apiUrl);
+            }
+        }
+
+        // 搜索引擎切换
+        document.querySelectorAll('.engine-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.engine-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentEngine = this.dataset.engine;
+            });
+        });
+
+        // 搜索功能
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                const searchUrl = searchEngines[currentEngine] + encodeURIComponent(query);
+                window.open(searchUrl, '_blank');
+            }
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', performSearch);
+
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 清除搜索内容
+        function clearSearch() {
+            const input = document.getElementById('searchInput');
+            input.value = '';
+            input.focus();
+            document.getElementById('clearBtn').classList.remove('show');
+        }
+
+        document.getElementById('clearBtn').addEventListener('click', clearSearch);
+        document.getElementById('clearHint').addEventListener('click', clearSearch);
+
+        // 监听输入框
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const clearBtn = document.getElementById('clearBtn');
+            if (this.value.length > 0) {
+                clearBtn.classList.add('show');
+            } else {
+                clearBtn.classList.remove('show');
+            }
+        });
+
+        // 壁纸切换按钮
+        document.getElementById('wallpaperBtn').addEventListener('click', loadWallpaper);
+
+        // 60s新闻功能
+        let newsLoaded = false;
+        let newsLoading = false;
+
+        async function loadNews() {
+            if (newsLoading) return;
+            newsLoading = true;
+
+            const body = document.getElementById('newsModalBody');
+            body.innerHTML = '<div class="news-loading"><div class="loader"></div>正在获取新闻...</div>';
+
+            try {
+                // 动态生成今天的日期
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                const apiUrl = `https://60s-static.viki.moe/60s/${dateStr}.json`;
+
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+
+                let html = '';
+
+                if (data.news && Array.isArray(data.news) && data.news.length > 0) {
+                    data.news.forEach((item, index) => {
+                        html += `<div class="news-item"><span class="news-index">${index + 1}</span><span>${item.trim()}</span></div>`;
+                    });
+                } else {
+                    html += '<div class="news-error">暂无新闻数据，请稍后重试</div>';
+                }
+
+                if (data.tip && data.tip.trim()) {
+                    html += `<div class="news-weiyu">【微语】${data.tip.trim()}</div>`;
+                }
+
+                body.innerHTML = html;
+                newsLoaded = true;
+            } catch (error) {
+                console.error('新闻加载失败:', error);
+                body.innerHTML = '<div class="news-error">新闻加载失败，请稍后重试</div>';
+            }
+
+            newsLoading = false;
+        }
+
+        // 打开新闻弹窗
+        document.getElementById('newsBtn').addEventListener('click', function() {
+            document.getElementById('newsModal').classList.add('show');
+            if (!newsLoaded) {
+                loadNews();
+            }
+        });
+
+        // 关闭新闻弹窗
+        document.getElementById('newsCloseBtn').addEventListener('click', function() {
+            document.getElementById('newsModal').classList.remove('show');
+        });
+
+        // 点击遮罩关闭
+        document.getElementById('newsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+
+        // ESC关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('newsModal').classList.remove('show');
+            }
+        });
+
+        // 初始化
+        updateTime();
+        setInterval(updateTime, 1000);
+        loadWallpaper();
+
+        document.getElementById('searchInput').focus();
+    </script>
+</body>
+</html>
